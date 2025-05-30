@@ -13,13 +13,12 @@ export {
   ErrorBoundary,
 } from 'expo-router';
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+export const unstable_settings = {
+  initialRouteName: 'index', // agora a rota inicial é a index.tsx
+};
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -27,7 +26,6 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -51,7 +49,12 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        {/* Tela principal: app/index.tsx */}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+
+        {/* Outras rotas: adicionar aqui conforme criar os arquivos */}
+        <Stack.Screen name="login" options={{ title: 'Login' }} />
+        <Stack.Screen name="personalizar" options={{ title: 'Personalizar' }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>
