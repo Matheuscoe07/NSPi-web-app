@@ -1,9 +1,24 @@
-import { View, Text, Image, Pressable, StyleSheet, ScrollView, Dimensions, SafeAreaView } from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet, ScrollView, FlatList, Dimensions, SafeAreaView } from 'react-native';
 import { Link, router } from 'expo-router';
 
 const screenWidth = Dimensions.get('window').width;
 const isSmallScreen = screenWidth < 600;
 const isUserLoggedIn = false;
+
+const bases = [
+    { id: '1', nome: 'Base Transparente', imagem: require('../assets/images/teste.png') },
+    { id: '2', nome: 'Base Branca', imagem: require('../assets/images/teste.png') },
+    { id: '3', nome: 'Base Cinza Clara', imagem: require('../assets/images/teste.png') },
+    { id: '4', nome: 'Base Cinza Escura', imagem: require('../assets/images/teste.png') },
+    { id: '5', nome: 'Base Preta', imagem: require('../assets/images/teste.png') },
+];
+
+const suportes = [
+    { id: '1', nome: 'Suporte Amarelo', imagem: require('../assets/images/teste.png') },
+    { id: '2', nome: 'Suporte Azul', imagem: require('../assets/images/teste.png') },
+    { id: '3', nome: 'Suporte Verde', imagem: require('../assets/images/teste.png') },
+    { id: '4', nome: 'Suporte Vermelho', imagem: require('../assets/images/teste.png') },
+];
 
 export default function Home() {
     const handleCreateNow = () => {
@@ -13,6 +28,17 @@ export default function Home() {
             router.push('/login');
         }
     };
+
+    const renderItem = ({ item }: any) => (
+        <View style={styles.catalogItem}>
+            <Image
+                source={item.imagem}
+                style={styles.catalogImage}
+                resizeMode="contain"
+            />
+            <Text style={styles.catalogTitle}>{item.nome}</Text>
+        </View>
+    );
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -24,7 +50,6 @@ export default function Home() {
                         <Link href="/login">
                             <Text style={styles.link}>Entrar</Text>
                         </Link>
-
                         <Link href="/registrar" asChild>
                             <Pressable style={styles.registerButton}>
                                 <Text style={styles.registerButtonText}>Registrar</Text>
@@ -50,24 +75,29 @@ export default function Home() {
                     </Pressable>
                 </View>
 
-                {/* Produtos */}
+                {/* Catálogo de produtos */}
                 <View style={styles.productsSection}>
-                    <Text style={[styles.productsTitle, isSmallScreen && { textAlign: 'center' }]}>
-                        Conheça nossos produtos manufaturados
-                    </Text>
-                    <View style={[styles.productRow, isSmallScreen && styles.productColumn]}>
-                        <Text style={[styles.productText, isSmallScreen && { textAlign: 'center' }]}>
-                            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa{'\n'}
-                            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                        </Text>
-                        <Image
-                            source={require('../assets/images/teste.png')}
-                            style={[
-                                styles.productImage,
-                                isSmallScreen && { width: '100%', height: 200 },
-                            ]}
-                        />
-                    </View>
+                    <Text style={styles.productsTitle}>Conheça nossos produtos manufaturados</Text>
+
+                    <Text style={styles.catalogHeader}>Suportes</Text>
+                    <FlatList
+                        data={suportes}
+                        renderItem={renderItem}
+                        keyExtractor={item => item.id}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.catalogList}
+                    />
+
+                    <Text style={styles.catalogHeader}>Bases</Text>
+                    <FlatList
+                        data={bases}
+                        renderItem={renderItem}
+                        keyExtractor={item => item.id}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.catalogList}
+                    />
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -75,14 +105,8 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
+    safeArea: { flex: 1, backgroundColor: '#fff' },
+    container: { flex: 1, backgroundColor: '#fff' },
     header: {
         padding: 16,
         paddingVertical: 8,
@@ -101,10 +125,7 @@ const styles = StyleSheet.create({
         gap: 12,
         alignItems: 'center',
     },
-    link: {
-        color: '#0a4c82',
-        fontSize: 16,
-    },
+    link: { color: '#0a4c82', fontSize: isSmallScreen ? 16 : 18 },
     registerButton: {
         backgroundColor: '#0a4c82',
         paddingVertical: 6,
@@ -115,7 +136,7 @@ const styles = StyleSheet.create({
     },
     registerButtonText: {
         color: 'white',
-        fontSize: 16,
+        fontSize: isSmallScreen ? 16 : 18,
         fontWeight: 'bold',
     },
     hero: {
@@ -124,16 +145,14 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
     },
     title: {
-        fontSize: 32,
+        fontSize: isSmallScreen ? 32 : 42,
         color: 'white',
         fontWeight: 'bold',
-        textAlign: 'left',
         marginBottom: 24,
     },
     description: {
-        fontSize: 16,
+        fontSize: isSmallScreen ? 16 : 20,
         color: 'white',
-        textAlign: 'left',
         marginBottom: 24,
     },
     ctaButtonWrapper: {
@@ -148,36 +167,38 @@ const styles = StyleSheet.create({
     },
     ctaText: {
         fontWeight: 'bold',
-        fontSize: 16,
+        fontSize: isSmallScreen ? 16 : 20,
     },
     productsSection: {
         padding: 24,
     },
     productsTitle: {
-        fontSize: 24,
+        fontSize: isSmallScreen ? 24 : 32,
         fontWeight: 'bold',
         marginBottom: 12,
-        textAlign: 'left',
         borderBottomWidth: 1,
         paddingBottom: 8,
     },
-    productRow: {
-        flexDirection: 'row',
-        gap: 20,
-        marginTop: 16,
-        alignItems: 'flex-start',
+    catalogHeader: {
+        fontSize: isSmallScreen ? 20 : 26,
+        fontWeight: '600',
+        marginVertical: 12,
     },
-    productColumn: {
-        flexDirection: 'column',
+    catalogList: {
+        paddingBottom: 16,
     },
-    productText: {
-        flex: 1,
-        fontSize: 14,
-        textAlign: 'left',
+    catalogItem: {
+        marginRight: 16,
+        alignItems: 'center',
+        width: isSmallScreen ? 160 : 220,
     },
-    productImage: {
-        width: 150,
-        height: 150,
-        resizeMode: 'contain',
+    catalogImage: {
+        width: isSmallScreen ? 160 : 220,
+        height: isSmallScreen ? 90 : 140,
+    },
+    catalogTitle: {
+        marginTop: 6,
+        fontSize: isSmallScreen ? 14 : 18,
+        textAlign: 'center',
     },
 });
