@@ -1,12 +1,9 @@
-console.log('⚠️ Tela de registro carregada');
-
-import { TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
-  Pressable,
+  TouchableOpacity,
   StyleSheet,
   Alert,
   KeyboardAvoidingView,
@@ -17,7 +14,6 @@ import { supabase } from '../src/services/supabase';
 import bcrypt from 'bcryptjs';
 
 export default function RegisterScreen() {
-  console.warn('🚀 Tela registrar MONTADA');
   const [nome, setNome] = useState('');
   const [sobrenome, setSobrenome] = useState('');
   const [email, setEmail] = useState('');
@@ -25,7 +21,6 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     console.log('🔥 handleRegister chamado');
-    console.log('Botão foi clicado!');
 
     if (!nome || !sobrenome || !email || !senha) {
       Alert.alert('Erro', 'Preencha todos os campos.');
@@ -35,25 +30,28 @@ export default function RegisterScreen() {
     const senha_hash = bcrypt.hashSync(senha, 10);
     const data_cadastro = new Date().toISOString();
 
-    const { error } = await supabase.from('usuarios').insert([
-      {
-        nome,
-        sobrenome,
-        email,
-        senha_hash,
-        data_cadastro,
-        tipo_usuario: 'aluno',
-      },
-    ]);
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .insert([
+          {
+            nome,
+            sobrenome,
+            email,
+            senha_hash,
+            data_cadastro,
+            tipo_usuario: 'Admin',
+          },
+        ])
+        .throwOnError(); // força erro visível se algo der ruim
 
-    if (error) {
-      console.error('Erro ao registrar:', error);
-      Alert.alert('Erro', 'Não foi possível registrar. Verifique os dados.');
-      return;
+      console.log('✅ Inserido com sucesso:', data);
+      Alert.alert('Sucesso', 'Registro realizado com sucesso!');
+      router.replace('/login');
+    } catch (err: any) {
+      console.error('❌ Erro ao registrar:', err);
+      Alert.alert('Erro', 'Não foi possível registrar. Verifique os dados ou tente novamente.');
     }
-
-    Alert.alert('Sucesso', 'Registro realizado com sucesso!');
-    router.replace('/login');
   };
 
   return (
@@ -91,17 +89,10 @@ export default function RegisterScreen() {
           onChangeText={setSenha}
           secureTextEntry
         />
-        
-        <TouchableOpacity
-  style={styles.button}
-  onPress={() => {
-    console.log('🟢 Botão (TouchableOpacity) clicado');
-    handleRegister();
-  }}
->
-  <Text style={styles.buttonText}>Registrar</Text>
-</TouchableOpacity>
 
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
+          <Text style={styles.buttonText}>Registrar</Text>
+        </TouchableOpacity>
 
         <Text style={styles.loginPrompt}>
           Já tem uma conta?{' '}
@@ -163,6 +154,4 @@ const styles = StyleSheet.create({
     color: '#003b61',
     fontWeight: 'bold',
   },
-
-  
 });
