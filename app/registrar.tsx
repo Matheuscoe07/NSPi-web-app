@@ -40,7 +40,7 @@ export default function RegisterScreen() {
             email,
             senha_hash,
             data_cadastro,
-            tipo_usuario: 'Admin',
+            tipo_usuario: 'user',
           },
         ])
         .throwOnError(); // força erro visível se algo der ruim
