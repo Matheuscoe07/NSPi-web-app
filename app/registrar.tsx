@@ -12,6 +12,7 @@ import {
 import { Link, router } from 'expo-router';
 import { supabase } from '../src/services/supabase';
 import bcrypt from 'bcryptjs';
+import React from 'react';
 
 export default function RegisterScreen() {
   const [nome, setNome] = useState('');

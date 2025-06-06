@@ -1,5 +1,6 @@
 import { View, Text, Image, Pressable, StyleSheet, ScrollView, FlatList, Dimensions, SafeAreaView } from 'react-native';
 import { Link, router } from 'expo-router';
+import React from 'react';
 
 const screenWidth = Dimensions.get('window').width;
 const isSmallScreen = screenWidth < 600;
@@ -23,7 +24,7 @@ const suportes = [
 export default function Home() {
     const handleCreateNow = () => {
         if (isUserLoggedIn) {
-            router.push('/pedido');
+            router.push('/fazer_pedido');
         } else {
             router.push('/login');
         }

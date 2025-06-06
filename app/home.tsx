@@ -1,5 +1,6 @@
 import { View, Text, Image, Pressable, StyleSheet, ScrollView, FlatList, Dimensions, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
+import React from 'react';
 
 const screenWidth = Dimensions.get('window').width;
 const isSmallScreen = screenWidth < 600;
@@ -22,7 +23,7 @@ const suportes = [
 export default function Home() {
     const handleCreateNow = () => {
         // Redireciona diretamente para a página de pedidos ou outra página relevante
-        router.push('/pedido');  // Atualize se necessário
+        router.push('/fazer_pedido');  // Atualize se necessário
     };
 
     const renderItem = ({ item }: any) => (

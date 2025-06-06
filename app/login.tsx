@@ -12,6 +12,7 @@ import {
 import { Link, router } from 'expo-router';
 import { supabase } from '../src/services/supabase'; // Certifique-se de que este caminho está correto
 import bcrypt from 'bcryptjs';  // Importando bcrypt
+import React from 'react';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
