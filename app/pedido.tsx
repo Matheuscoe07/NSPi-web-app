@@ -1,30 +1,35 @@
+import React from 'react';
 import { useState } from 'react';
 import { View, Text, Pressable, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-import React from 'react';
 
-// Simula as cores disponíveis e suas respectivas imagens
-const coresSuporte = [
+// Tipo para itens de cor que pode ser string (cor) ou imagem
+type CorItem = {
+    cor: string | any;
+    imagem: any;
+};
+
+const coresSuporte: CorItem[] = [
     { cor: 'blue', imagem: require('../assets/images/teste.png') },
     { cor: 'red', imagem: require('../assets/images/teste.png') },
     { cor: 'yellow', imagem: require('../assets/images/teste.png') },
     { cor: 'green', imagem: require('../assets/images/teste.png') },
 ];
 
-const coresBase = [
+const coresBase: CorItem[] = [
     { cor: 'black', imagem: require('../assets/images/teste.png') },
     { cor: 'lightgray', imagem: require('../assets/images/teste.png') },
     { cor: 'gray', imagem: require('../assets/images/teste.png') },
     { cor: 'darkgray', imagem: require('../assets/images/teste.png') },
-    { cor: 'silver', imagem: require('../assets/images/teste.png') },
+    { cor: 'white', imagem: require('../assets/images/teste.png') },
+    { cor: require('../assets/images/transparente.png'), imagem: require('../assets/images/teste.png') },
 ];
 
 export default function Pedido() {
-    const [corSuporte, setCorSuporte] = useState(coresSuporte[0]);
-    const [corBase, setCorBase] = useState(coresBase[0]);
+    const [corSuporte, setCorSuporte] = useState<CorItem>(coresSuporte[0]);
+    const [corBase, setCorBase] = useState<CorItem>(coresBase[0]);
 
     const handleFeito = () => {
-        // Aqui futuramente você chama o backend
         console.log('Pedido enviado:', {
         suporte: corSuporte.cor,
         base: corBase.cor,
@@ -32,22 +37,44 @@ export default function Pedido() {
         router.push('/confirmado');
     };
 
-    return ( 
+    const renderCores = (
+        lista: CorItem[],
+        selecionado: CorItem,
+        setSelecionado: (item: CorItem) => void
+    ) => (
+        <View style={styles.listaCores}>
+        {lista.map((item, index) => {
+            const isSelecionado = selecionado.cor === item.cor;
+            return (
+            <Pressable
+                key={index}
+                onPress={() => setSelecionado(item)}
+                style={[styles.bolinhaWrapper, isSelecionado && styles.selecionado]}
+            >
+                {typeof item.cor === 'string' ? (
+                <View style={[styles.bolinha, { backgroundColor: item.cor }]} />
+                ) : (
+                <View style={styles.bolinha}>
+                    <Image
+                    source={item.cor}
+                    style={styles.bolinhaImagem}
+                    />
+                </View>
+                )}
+            </Pressable>
+            );
+        })}
+        </View>
+    );
+
+    return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <Text style={styles.titulo}>MONTANDO O SEU EQUIPAMENTO</Text>
 
         <View style={styles.secao}>
             <Text style={styles.subtitulo}>ESCOLHA A COR DO SEU SUPORTE</Text>
             <View style={styles.opcoes}>
-            <View style={styles.cores}>
-                {coresSuporte.map((item, index) => (
-                <Pressable
-                    key={index}
-                    onPress={() => setCorSuporte(item)}
-                    style={[styles.bolinha, { backgroundColor: item.cor, borderWidth: corSuporte.cor === item.cor ? 2 : 0 }]}
-                />
-                ))}
-            </View>
+            {renderCores(coresSuporte, corSuporte, setCorSuporte)}
             <Image source={corSuporte.imagem} style={styles.imagem} resizeMode="contain" />
             </View>
         </View>
@@ -55,15 +82,7 @@ export default function Pedido() {
         <View style={styles.secao}>
             <Text style={styles.subtitulo}>ESCOLHA A COR DA SUA BASE</Text>
             <View style={styles.opcoes}>
-            <View style={styles.cores}>
-                {coresBase.map((item, index) => (
-                <Pressable
-                    key={index}
-                    onPress={() => setCorBase(item)}
-                    style={[styles.bolinha, { backgroundColor: item.cor, borderWidth: corBase.cor === item.cor ? 2 : 0 }]}
-                />
-                ))}
-            </View>
+            {renderCores(coresBase, corBase, setCorBase)}
             <Image source={corBase.imagem} style={styles.imagem} resizeMode="contain" />
             </View>
         </View>
@@ -104,21 +123,40 @@ const styles = StyleSheet.create({
     opcoes: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
+        gap: 20,
     },
-    cores: {
+    listaCores: {
         flexDirection: 'column',
         gap: 10,
+    },
+    bolinhaWrapper: {
+        padding: 2,
+        borderRadius: 20,
+        borderColor: '#ccc',
+        borderWidth: 2,
+    },
+    selecionado: {
+        borderColor: '#000',
+        borderWidth: 3,
     },
     bolinha: {
         width: 24,
         height: 24,
         borderRadius: 12,
-        borderColor: 'black',
+        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    bolinhaImagem: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'contain',
     },
     imagem: {
-        width: 200,
-        height: 150,
+        width: 180,
+        height: 140,
+        marginLeft: 16,
     },
     botao: {
         backgroundColor: '#cce6ff',
