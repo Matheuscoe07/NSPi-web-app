@@ -24,7 +24,7 @@ const suportes = [
 export default function Home() {
     const handleCreateNow = () => {
         if (isUserLoggedIn) {
-            router.push('/fazer_pedido');
+            router.push('/pedido');
         } else {
             router.push('/login');
         }

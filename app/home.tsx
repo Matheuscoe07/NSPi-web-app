@@ -23,7 +23,7 @@ const suportes = [
 export default function Home() {
     const handleCreateNow = () => {
         // Redireciona diretamente para a página de pedidos ou outra página relevante
-        router.push('/fazer_pedido');  // Atualize se necessário
+        router.push('/pedido');  // Atualize se necessário
     };
 
     const renderItem = ({ item }: any) => (
