@@ -1,40 +1,59 @@
-import React from 'react';
-import { useState } from 'react';
-import { View, Text, Pressable, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Pressable, Image, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { criarPedidoSimples } from '../src/lib/criarPedido';
 
 // Tipo para itens de cor que pode ser string (cor) ou imagem
+// Agora com id para uso no backend
 type CorItem = {
+    id: number;
     cor: string | any;
     imagem: any;
 };
 
 const coresSuporte: CorItem[] = [
-    { cor: 'blue', imagem: require('../assets/images/teste.png') },
-    { cor: 'red', imagem: require('../assets/images/teste.png') },
-    { cor: 'yellow', imagem: require('../assets/images/teste.png') },
-    { cor: 'green', imagem: require('../assets/images/teste.png') },
+    { id: 1, cor: 'blue', imagem: require('../assets/images/teste.png') },
+    { id: 2, cor: 'red', imagem: require('../assets/images/teste.png') },
+    { id: 3, cor: 'yellow', imagem: require('../assets/images/teste.png') },
+    { id: 4, cor: 'green', imagem: require('../assets/images/teste.png') },
 ];
 
 const coresBase: CorItem[] = [
-    { cor: 'black', imagem: require('../assets/images/teste.png') },
-    { cor: 'lightgray', imagem: require('../assets/images/teste.png') },
-    { cor: 'gray', imagem: require('../assets/images/teste.png') },
-    { cor: 'darkgray', imagem: require('../assets/images/teste.png') },
-    { cor: 'white', imagem: require('../assets/images/teste.png') },
-    { cor: require('../assets/images/transparente.png'), imagem: require('../assets/images/teste.png') },
+    { id: 5, cor: 'black', imagem: require('../assets/images/teste.png') },
+    { id: 6, cor: 'lightgray', imagem: require('../assets/images/teste.png') },
+    { id: 7, cor: 'gray', imagem: require('../assets/images/teste.png') },
+    { id: 8, cor: 'darkgray', imagem: require('../assets/images/teste.png') },
+    { id: 9, cor: 'white', imagem: require('../assets/images/teste.png') },
+    { id: 10, cor: require('../assets/images/transparente.png'), imagem: require('../assets/images/teste.png') },
 ];
 
 export default function Pedido() {
     const [corSuporte, setCorSuporte] = useState<CorItem>(coresSuporte[0]);
     const [corBase, setCorBase] = useState<CorItem>(coresBase[0]);
 
-    const handleFeito = () => {
-        console.log('Pedido enviado:', {
-        suporte: corSuporte.cor,
-        base: corBase.cor,
+    const handleFeito = async () => {
+        const usuarioIdString = await AsyncStorage.getItem('usuario_id');
+        const id_usuario = usuarioIdString ? parseInt(usuarioIdString, 10) : null;
+
+        if (!id_usuario) {
+        Alert.alert('Erro', 'Usuário não identificado. Faça login novamente.');
+        return;
+        }
+
+        const nome_customizado = `Suporte ${corSuporte.cor} + Base ${corBase.cor}`;
+        const result = await criarPedidoSimples({
+        id_usuario,
+        id_base: corBase.id,
+        id_suporte: corSuporte.id,
+        nome_customizado,
         });
+
+        if (result.error) {
+        Alert.alert('Erro', result.error);
+        } else {
         router.push('/confirmado');
+        }
     };
 
     const renderCores = (
@@ -55,10 +74,7 @@ export default function Pedido() {
                 <View style={[styles.bolinha, { backgroundColor: item.cor }]} />
                 ) : (
                 <View style={styles.bolinha}>
-                    <Image
-                    source={item.cor}
-                    style={styles.bolinhaImagem}
-                    />
+                    <Image source={item.cor} style={styles.bolinhaImagem} />
                 </View>
                 )}
             </Pressable>

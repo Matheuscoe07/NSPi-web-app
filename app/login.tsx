@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,9 @@ import {
   Platform,
 } from 'react-native';
 import { Link, router } from 'expo-router';
-import { supabase } from '../src/services/supabase'; // Certifique-se de que este caminho está correto
-import bcrypt from 'bcryptjs';  // Importando bcrypt
-import React from 'react';
+import { supabase } from '../src/services/supabase';
+import bcrypt from 'bcryptjs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -25,12 +25,11 @@ export default function LoginScreen() {
     }
 
     try {
-      // Consultar usuário no banco de dados (Supabase)
       const { data, error } = await supabase
         .from('usuarios')
         .select('*')
         .eq('email', email)
-        .single();  // Pega o primeiro usuário que corresponde
+        .single();
 
       if (error || !data) {
         console.error('Erro ao buscar o usuário:', error?.message);
@@ -38,7 +37,6 @@ export default function LoginScreen() {
         return;
       }
 
-      // Comparando a senha fornecida com a senha criptografada no banco
       const senhaValida = bcrypt.compareSync(senha, data.senha_hash);
 
       if (!senhaValida) {
@@ -46,9 +44,11 @@ export default function LoginScreen() {
         return;
       }
 
-      // Se as credenciais estão corretas, faz o login e redireciona
+      // Salva o ID do usuário no AsyncStorage
+      await AsyncStorage.setItem('usuario_id', data.id_usuario.toString());
+
       Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      router.replace('../home');  // Redireciona para a página Home
+      router.replace('../home');
     } catch (err) {
       console.error('Erro ao realizar login:', err);
       Alert.alert('Erro', 'Erro ao tentar fazer login.');
