@@ -44,11 +44,21 @@ export default function LoginScreen() {
         return;
       }
 
-      // Salva o ID do usuário no AsyncStorage
+      // Salva o ID e tipo do usuário
       await AsyncStorage.setItem('usuario_id', data.id_usuario.toString());
+      await AsyncStorage.setItem('tipo_usuario', data.tipo); // 'user' ou 'operator'
 
+      console.log(`🔐 Login confirmado. Tipo de usuário: ${data.tipo}`);
       Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      router.replace('../home');
+
+      // Redireciona com base no tipo de usuário
+      if (data.tipo?.toLowerCase() === 'operator') {
+        Alert.alert('DEBUG', 'Redirecionando pra /operador');
+        router.replace('/operador');
+      } else {
+        Alert.alert('DEBUG', 'Redirecionando pra /home');
+        router.replace('/home');
+      }
     } catch (err) {
       console.error('Erro ao realizar login:', err);
       Alert.alert('Erro', 'Erro ao tentar fazer login.');
