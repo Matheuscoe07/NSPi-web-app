@@ -7,18 +7,18 @@ const isSmallScreen = screenWidth < 600;
 const isUserLoggedIn = false;
 
 const bases = [
-    { id: '1', nome: 'Base Transparente', imagem: require('../assets/images/teste.png') },
-    { id: '2', nome: 'Base Branca', imagem: require('../assets/images/teste.png') },
-    { id: '3', nome: 'Base Cinza Clara', imagem: require('../assets/images/teste.png') },
-    { id: '4', nome: 'Base Cinza Escura', imagem: require('../assets/images/teste.png') },
-    { id: '5', nome: 'Base Preta', imagem: require('../assets/images/teste.png') },
+    { id: '1', nome: 'Base Transparente', imagem: require('../assets/images/ba_transparente.png') },
+    { id: '2', nome: 'Base Branca', imagem: require('../assets/images/ba_branco.png') },
+    { id: '3', nome: 'Base Cinza Clara', imagem: require('../assets/images/ba_cinzaCA.png') },
+    { id: '4', nome: 'Base Cinza Escura', imagem: require('../assets/images/ba_cinzaES.png') },
+    { id: '5', nome: 'Base Preta', imagem: require('../assets/images/ba_preto.png') },
 ];
 
 const suportes = [
-    { id: '1', nome: 'Suporte Amarelo', imagem: require('../assets/images/teste.png') },
-    { id: '2', nome: 'Suporte Azul', imagem: require('../assets/images/teste.png') },
-    { id: '3', nome: 'Suporte Verde', imagem: require('../assets/images/teste.png') },
-    { id: '4', nome: 'Suporte Vermelho', imagem: require('../assets/images/teste.png') },
+    { id: '1', nome: 'Suporte Amarelo', imagem: require('../assets/images/sup_amarelo.png') },
+    { id: '2', nome: 'Suporte Azul', imagem: require('../assets/images/sup_azul.png') },
+    { id: '3', nome: 'Suporte Verde', imagem: require('../assets/images/sup_verde.png') },
+    { id: '4', nome: 'Suporte Vermelho', imagem: require('../assets/images/sup_vermelho.png') },
 ];
 
 export default function Home() {
@@ -31,15 +31,17 @@ export default function Home() {
     };
 
     const renderItem = ({ item }: any) => (
-        <View style={styles.catalogItem}>
+    <View style={styles.catalogItem}>
+        <View style={styles.imageWrapper}>
             <Image
                 source={item.imagem}
                 style={styles.catalogImage}
-                resizeMode="contain"
+                resizeMode="cover" // "cover" para preencher a área com arredondamento
             />
-            <Text style={styles.catalogTitle}>{item.nome}</Text>
         </View>
-    );
+        <Text style={styles.catalogTitle}>{item.nome}</Text>
+    </View>
+);
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -193,10 +195,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: isSmallScreen ? 160 : 220,
     },
-    catalogImage: {
-        width: isSmallScreen ? 160 : 220,
-        height: isSmallScreen ? 90 : 140,
+
+    imageWrapper: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    width: isSmallScreen ? 160 : 220,
+    height: isSmallScreen ? 90 : 140,
+    backgroundColor: '#fff',
     },
+
+    catalogImage: {
+        width: '100%',
+        height: '100%',
+    },
+    
     catalogTitle: {
         marginTop: 6,
         fontSize: isSmallScreen ? 14 : 18,

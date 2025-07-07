@@ -4,186 +4,189 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { criarPedidoSimples } from '../src/lib/criarPedido';
 
-// Tipo para itens de cor que pode ser string (cor) ou imagem
-// Agora com id para uso no backend
 type CorItem = {
-    id: number;
-    cor: string | any;
-    imagem: any;
+  id: number;
+  cor: string | any;
+  imagem: any;
 };
 
 const coresSuporte: CorItem[] = [
-    { id: 1, cor: 'blue', imagem: require('../assets/images/teste.png') },
-    { id: 2, cor: 'red', imagem: require('../assets/images/teste.png') },
-    { id: 3, cor: 'yellow', imagem: require('../assets/images/teste.png') },
-    { id: 4, cor: 'green', imagem: require('../assets/images/teste.png') },
+  { id: 1, cor: 'blue', imagem: require('../assets/images/sup_azul.png') },
+  { id: 2, cor: 'red', imagem: require('../assets/images/sup_vermelho.png') },
+  { id: 3, cor: 'yellow', imagem: require('../assets/images/sup_amarelo.png') },
+  { id: 4, cor: 'green', imagem: require('../assets/images/sup_verde.png') },
 ];
 
 const coresBase: CorItem[] = [
-    { id: 5, cor: 'black', imagem: require('../assets/images/teste.png') },
-    { id: 6, cor: 'lightgray', imagem: require('../assets/images/teste.png') },
-    { id: 7, cor: 'gray', imagem: require('../assets/images/teste.png') },
-    { id: 8, cor: 'darkgray', imagem: require('../assets/images/teste.png') },
-    { id: 9, cor: 'white', imagem: require('../assets/images/teste.png') },
-    { id: 10, cor: require('../assets/images/transparente.png'), imagem: require('../assets/images/teste.png') },
+  { id: 5, cor: 'black', imagem: require('../assets/images/ba_preto.png') },
+  { id: 6, cor: 'lightgray', imagem: require('../assets/images/ba_cinzaCA.png') },
+  { id: 8, cor: 'darkgray', imagem: require('../assets/images/ba_cinzaES.png') },
+  { id: 9, cor: 'white', imagem: require('../assets/images/ba_branco.png') },
+  { id: 10, cor: require('../assets/images/transparente.png'), imagem: require('../assets/images/ba_transparente.png') },
 ];
 
 export default function Pedido() {
-    const [corSuporte, setCorSuporte] = useState<CorItem>(coresSuporte[0]);
-    const [corBase, setCorBase] = useState<CorItem>(coresBase[0]);
+  const [corSuporte, setCorSuporte] = useState<CorItem>(coresSuporte[0]);
+  const [corBase, setCorBase] = useState<CorItem>(coresBase[0]);
+  const [etapa, setEtapa] = useState<'suporte' | 'base'>('suporte');
 
-    const handleFeito = async () => {
-        const usuarioIdString = await AsyncStorage.getItem('usuario_id');
-        const id_usuario = usuarioIdString ? parseInt(usuarioIdString, 10) : null;
+  const handleFeito = async () => {
+    const usuarioIdString = await AsyncStorage.getItem('usuario_id');
+    const id_usuario = usuarioIdString ? parseInt(usuarioIdString, 10) : null;
 
-        if (!id_usuario) {
-        Alert.alert('Erro', 'Usuário não identificado. Faça login novamente.');
-        return;
-        }
+    if (!id_usuario) {
+      Alert.alert('Erro', 'Usuário não identificado. Faça login novamente.');
+      return;
+    }
 
-        const nome_customizado = `Suporte ${corSuporte.cor} + Base ${corBase.cor}`;
-        const result = await criarPedidoSimples({
-        id_usuario,
-        id_base: corBase.id,
-        id_suporte: corSuporte.id,
-        nome_customizado,
-        });
+    const nome_customizado = `Suporte ${corSuporte.cor} + Base ${corBase.cor}`;
+    const result = await criarPedidoSimples({
+      id_usuario,
+      id_base: corBase.id,
+      id_suporte: corSuporte.id,
+      nome_customizado,
+    });
 
-        if (result.error) {
-        Alert.alert('Erro', result.error);
-        } else {
-        router.push('/confirmado');
-        }
-    };
+    if (result.error) {
+      Alert.alert('Erro', result.error);
+    } else {
+      router.push('/confirmado');
+    }
+  };
 
-    const renderCores = (
-        lista: CorItem[],
-        selecionado: CorItem,
-        setSelecionado: (item: CorItem) => void
-    ) => (
-        <View style={styles.listaCores}>
-        {lista.map((item, index) => {
-            const isSelecionado = selecionado.cor === item.cor;
-            return (
-            <Pressable
-                key={index}
-                onPress={() => setSelecionado(item)}
-                style={[styles.bolinhaWrapper, isSelecionado && styles.selecionado]}
-            >
-                {typeof item.cor === 'string' ? (
-                <View style={[styles.bolinha, { backgroundColor: item.cor }]} />
-                ) : (
-                <View style={styles.bolinha}>
-                    <Image source={item.cor} style={styles.bolinhaImagem} />
-                </View>
-                )}
-            </Pressable>
-            );
-        })}
-        </View>
-    );
+  const renderCores = (
+    lista: Array<CorItem>,
+    selecionado: CorItem,
+    setSelecionado: React.Dispatch<React.SetStateAction<CorItem>>
+  ) => (
+    <View style={styles.listaCores}>
+      {lista.map((item, index) => {
+        const isSelecionado = selecionado.cor === item.cor;
+        return (
+          <Pressable
+            key={index}
+            onPress={() => setSelecionado(item)}
+            style={[styles.bolinhaWrapper, isSelecionado && styles.selecionado]}
+          >
+            {typeof item.cor === 'string' ? (
+              <View style={[styles.bolinha, { backgroundColor: item.cor }]} />
+            ) : (
+              <View style={styles.bolinha}>
+                <Image source={item.cor} style={styles.bolinhaImagem} />
+              </View>
+            )}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
 
-    return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.titulo}>MONTANDO O SEU EQUIPAMENTO</Text>
-
-        <View style={styles.secao}>
-            <Text style={styles.subtitulo}>ESCOLHA A COR DO SEU SUPORTE</Text>
-            <View style={styles.opcoes}>
-            {renderCores(coresSuporte, corSuporte, setCorSuporte)}
-            <Image source={corSuporte.imagem} style={styles.imagem} resizeMode="contain" />
-            </View>
-        </View>
-
-        <View style={styles.secao}>
-            <Text style={styles.subtitulo}>ESCOLHA A COR DA SUA BASE</Text>
-            <View style={styles.opcoes}>
-            {renderCores(coresBase, corBase, setCorBase)}
-            <Image source={corBase.imagem} style={styles.imagem} resizeMode="contain" />
-            </View>
-        </View>
-
-        <TouchableOpacity style={styles.botao} onPress={handleFeito}>
-            <Text style={styles.botaoTexto}>Feito!</Text>
+  return (
+    <View style={styles.container}>
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={handleFeito} style={styles.prontoBotao}>
+          <Text style={styles.prontoTexto}>Pronto</Text>
         </TouchableOpacity>
-        </ScrollView>
-    );
+      </View>
+
+      <View style={styles.visualizacao}>
+        <Image
+          source={etapa === 'suporte' ? corSuporte.imagem : corBase.imagem}
+          style={styles.imagem}
+          resizeMode="contain"
+        />
+      </View>
+
+      <View style={styles.controles}>
+        <TouchableOpacity onPress={() => setEtapa(etapa === 'suporte' ? 'base' : 'suporte')}>
+          <Text style={styles.seta}>{'<'}</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.etapaTitulo}>{etapa === 'suporte' ? 'Suporte' : 'Base'}</Text>
+
+        <TouchableOpacity onPress={() => setEtapa(etapa === 'suporte' ? 'base' : 'suporte')}>
+          <Text style={styles.seta}>{'>'}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {etapa === 'suporte'
+        ? renderCores(coresSuporte, corSuporte, setCorSuporte)
+        : renderCores(coresBase, corBase, setCorBase)}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        paddingHorizontal: 16,
-    },
-    content: {
-        paddingVertical: 24,
-        alignItems: 'center',
-    },
-    titulo: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 16,
-        textTransform: 'uppercase',
-        textAlign: 'center',
-    },
-    secao: {
-        width: '100%',
-        marginVertical: 16,
-    },
-    subtitulo: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    opcoes: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        gap: 20,
-    },
-    listaCores: {
-        flexDirection: 'column',
-        gap: 10,
-    },
-    bolinhaWrapper: {
-        padding: 2,
-        borderRadius: 20,
-        borderColor: '#ccc',
-        borderWidth: 2,
-    },
-    selecionado: {
-        borderColor: '#000',
-        borderWidth: 3,
-    },
-    bolinha: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        overflow: 'hidden',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    bolinhaImagem: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'contain',
-    },
-    imagem: {
-        width: 180,
-        height: 140,
-        marginLeft: 16,
-    },
-    botao: {
-        backgroundColor: '#cce6ff',
-        padding: 12,
-        paddingHorizontal: 32,
-        borderRadius: 12,
-        marginTop: 24,
-    },
-    botaoTexto: {
-        fontWeight: 'bold',
-        fontSize: 16,
-        color: '#000',
-    },
+  container: {
+    flex: 1,
+    backgroundColor: '#e3e3e3',
+  },
+  topBar: {
+    height: 50,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    padding: 10,
+  },
+  prontoBotao: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderRadius: 20,
+  },
+  prontoTexto: {
+    fontSize: 14,
+  },
+  visualizacao: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imagem: {
+    width: 200,
+    height: 200,
+  },
+  controles: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+  },
+  etapaTitulo: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  seta: {
+    fontSize: 24,
+  },
+  listaCores: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 10,
+    paddingBottom: 20,
+    backgroundColor: '#fff',
+  },
+  bolinhaWrapper: {
+    padding: 4,
+    borderRadius: 20,
+    borderColor: '#ccc',
+    borderWidth: 2,
+  },
+  selecionado: {
+    borderColor: '#000',
+    borderWidth: 3,
+  },
+  bolinha: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bolinhaImagem: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
 });
