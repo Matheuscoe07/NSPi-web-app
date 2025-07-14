@@ -142,8 +142,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   imagem: {
-    width: 200,
-    height: 200,
+    width: 750,
+    height: 750,
   },
   controles: {
     flexDirection: 'row',
