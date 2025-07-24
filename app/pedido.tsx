@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Image, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Dimensions,
+  Platform,
+} from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { criarPedidoSimples } from '../src/lib/criarPedido';
@@ -116,6 +126,8 @@ export default function Pedido() {
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -142,8 +154,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   imagem: {
-    width: 750,
-    height: 750,
+    width: Platform.OS === 'web' ? width * 0.4 : width * 0.8,
+    height: Platform.OS === 'web' ? width * 0.4 : width * 0.8,
   },
   controles: {
     flexDirection: 'row',

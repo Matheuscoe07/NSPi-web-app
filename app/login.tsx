@@ -44,20 +44,20 @@ export default function LoginScreen() {
         return;
       }
 
-      // Salva o ID e tipo do usuário
       await AsyncStorage.setItem('usuario_id', data.id_usuario.toString());
-      await AsyncStorage.setItem('tipo_usuario', data.tipo); // 'user' ou 'operator'
 
-      console.log(`🔐 Login confirmado. Tipo de usuário: ${data.tipo}`);
-      Alert.alert('Sucesso', 'Login realizado com sucesso!');
+      if (data.tipo_usuario) {
+        await AsyncStorage.setItem('tipo_usuario', data.tipo_usuario);
+        console.log(`🔐 Login confirmado. Tipo de usuário: ${data.tipo_usuario}`);
 
-      // Redireciona com base no tipo de usuário
-      if (data.tipo?.toLowerCase() === 'operator') {
-        Alert.alert('DEBUG', 'Redirecionando pra /operador');
-        router.replace('/operador');
+        if (data.tipo_usuario.toLowerCase() === 'operator') {
+          router.replace('/operador');
+        } else {
+          router.replace('/home');
+        }
       } else {
-        Alert.alert('DEBUG', 'Redirecionando pra /home');
-        router.replace('/home');
+        console.warn('❗ tipo_usuario não encontrado no Supabase!');
+        Alert.alert('Erro', 'O tipo de usuário não está definido.');
       }
     } catch (err) {
       console.error('Erro ao realizar login:', err);
