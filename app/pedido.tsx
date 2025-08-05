@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,18 +13,144 @@ import {
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { criarPedidoSimples } from '../src/lib/criarPedido';
+import { Canvas, useFrame } from '@react-three/fiber/native';
+import * as THREE from 'three';
 
 type CorItem = {
   id: number;
   cor: string | any;
   imagem: any;
+  corHex?: string;
 };
 
+// Componente do suporte 3D procedural
+function Suporte3D({ cor }: { cor: string }) {
+  const meshRef = useRef<THREE.Group>(null);
+
+  // Animação suave de rotação
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3;
+      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
+    }
+  });
+
+  return (
+    <group ref={meshRef} position={[0, 0, 0]}>
+      {/* Base do suporte */}
+      <mesh position={[0, -0.8, 0]}>
+        <cylinderGeometry args={[1.2, 1.5, 0.3, 16]} />
+        <meshStandardMaterial color={cor} roughness={0.3} metalness={0.1} />
+      </mesh>
+      
+      {/* Haste principal */}
+      <mesh position={[0, 0, 0]}>
+        <cylinderGeometry args={[0.15, 0.15, 1.5, 8]} />
+        <meshStandardMaterial color={cor} roughness={0.4} metalness={0.2} />
+      </mesh>
+      
+      {/* Suporte do celular - parte de trás */}
+      <mesh position={[0, 0.5, 0.4]}>
+        <boxGeometry args={[1.0, 1.2, 0.1]} />
+        <meshStandardMaterial color={cor} roughness={0.3} metalness={0.1} />
+      </mesh>
+      
+      {/* Apoio inferior */}
+      <mesh position={[0, -0.2, 0.6]}>
+        <boxGeometry args={[1.0, 0.15, 0.4]} />
+        <meshStandardMaterial color={cor} roughness={0.3} metalness={0.1} />
+      </mesh>
+      
+      {/* Detalhes decorativos */}
+      <mesh position={[0, 0.9, 0.35]}>
+        <sphereGeometry args={[0.08, 8, 8]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.1} metalness={0.8} />
+      </mesh>
+      
+      <mesh position={[-0.3, 0.3, 0.35]}>
+        <sphereGeometry args={[0.05, 8, 8]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.1} metalness={0.8} />
+      </mesh>
+      
+      <mesh position={[0.3, 0.3, 0.35]}>
+        <sphereGeometry args={[0.05, 8, 8]} />
+        <meshStandardMaterial color="#ffffff" roughness={0.1} metalness={0.8} />
+      </mesh>
+    </group>
+  );
+}
+
+// Componente de loading para 3D
+function Loading3D() {
+  return (
+    <mesh>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color="#cccccc" />
+    </mesh>
+  );
+}
+
+// Visualizador 3D
+function Viewer3D({ cor }: { cor: string }) {
+  return (
+    <Canvas
+      style={styles.canvas3d}
+      camera={{ position: [3, 2, 4], fov: 50 }}
+    >
+      {/* Iluminação ambiente */}
+      <ambientLight intensity={0.4} />
+      
+      {/* Luz principal */}
+      <directionalLight
+        position={[10, 10, 5]}
+        intensity={1}
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+      />
+      
+      {/* Luz de preenchimento */}
+      <pointLight position={[-5, 5, 2]} intensity={0.5} color="#ffffff" />
+      <pointLight position={[5, -2, -2]} intensity={0.3} color="#4a90e2" />
+      
+      {/* Plano de fundo sutil */}
+      <mesh position={[0, -2, -2]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[10, 10]} />
+        <meshStandardMaterial color="#f0f0f0" opacity={0.3} transparent />
+      </mesh>
+      
+      <Suspense fallback={<Loading3D />}>
+        <Suporte3D cor={cor} />
+      </Suspense>
+    </Canvas>
+  );
+}
+
 const coresSuporte: CorItem[] = [
-  { id: 1, cor: 'blue', imagem: require('../assets/images/sup_azul.png') },
-  { id: 2, cor: 'red', imagem: require('../assets/images/sup_vermelho.png') },
-  { id: 3, cor: 'yellow', imagem: require('../assets/images/sup_amarelo.png') },
-  { id: 4, cor: 'green', imagem: require('../assets/images/sup_verde.png') },
+  { 
+    id: 1, 
+    cor: 'blue', 
+    corHex: '#4a90e2',
+    imagem: require('../assets/images/sup_azul.png'),
+  },
+  { 
+    id: 2, 
+    cor: 'red', 
+    corHex: '#e74c3c',
+    imagem: require('../assets/images/sup_vermelho.png'),
+  },
+  { 
+    id: 3, 
+    cor: 'yellow', 
+    corHex: '#f1c40f',
+    imagem: require('../assets/images/sup_amarelo.png'),
+  },
+  { 
+    id: 4, 
+    cor: 'green', 
+    corHex: '#27ae60',
+    imagem: require('../assets/images/sup_verde.png'),
+  },
 ];
 
 const coresBase: CorItem[] = [
@@ -100,11 +226,15 @@ export default function Pedido() {
       </View>
 
       <View style={styles.visualizacao}>
-        <Image
-          source={etapa === 'suporte' ? corSuporte.imagem : corBase.imagem}
-          style={styles.imagem}
-          resizeMode="contain"
-        />
+        {etapa === 'suporte' ? (
+          <Viewer3D cor={corSuporte.corHex || corSuporte.cor} />
+        ) : (
+          <Image
+            source={corBase.imagem}
+            style={styles.imagem}
+            resizeMode="contain"
+          />
+        )}
       </View>
 
       <View style={styles.controles}>
@@ -154,6 +284,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   imagem: {
+    width: Platform.OS === 'web' ? width * 0.4 : width * 0.8,
+    height: Platform.OS === 'web' ? width * 0.4 : width * 0.8,
+  },
+  canvas3d: {
     width: Platform.OS === 'web' ? width * 0.4 : width * 0.8,
     height: Platform.OS === 'web' ? width * 0.4 : width * 0.8,
   },
